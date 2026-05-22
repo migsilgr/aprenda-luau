@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aprenda Luau — Roblox Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0c0c0f;
+      --surface:  #131318;
+      --border:   #222230;
+      --accent:   #e8ff47;
+      --accent2:  #47ffe8;
+      --text:     #e8e8f0;
+      --muted:    #7070a0;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'Lora', serif;
+      --font-code: 'IBM Plex Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: .03;
+      pointer-events: none;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 2.5rem;
+      background: rgba(12,12,15,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: var(--font-head);
+      font-weight: 800; font-size: 1.1rem;
+      color: var(--accent);
+      letter-spacing: -.02em;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: var(--font-head);
+      font-size: .85rem; font-weight: 700;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: .06em; text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: flex-start; justify-content: center;
+      padding: 8rem 2.5rem 4rem;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0; z-index: -1;
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 40%, rgba(232,255,71,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 20% 80%, rgba(71,255,232,.05) 0%, transparent 55%);
+    }
+    .hero-tag {
+      font-family: var(--font-code);
+      font-size: .8rem; color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: .25rem .75rem; border-radius: 2px;
+      margin-bottom: 1.5rem;
+      opacity: 0; animation: fadeUp .6s .2s forwards;
+    }
+    .hero h1 {
+      font-family: var(--font-head);
+      font-size: clamp(3rem, 9vw, 7.5rem);
+      font-weight: 800; line-height: 1;
+      letter-spacing: -.04em;
+      max-width: 16ch;
+      opacity: 0; animation: fadeUp .7s .35s forwards;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      margin-top: 2rem;
+      max-width: 54ch;
+      color: var(--muted);
+      font-size: 1.1rem;
+      opacity: 0; animation: fadeUp .7s .5s forwards;
+    }
+    .hero-cta {
+      margin-top: 2.5rem;
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      opacity: 0; animation: fadeUp .7s .65s forwards;
+    }
+    .btn {
+      font-family: var(--font-head);
+      font-weight: 700; font-size: .9rem;
+      letter-spacing: .05em; text-transform: uppercase;
+      padding: .85rem 2rem; border-radius: 3px;
+      text-decoration: none; cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: var(--accent); color: #0c0c0f;
+      box-shadow: 0 0 24px rgba(232,255,71,.3);
+    }
+    .btn-primary:hover { box-shadow: 0 0 36px rgba(232,255,71,.5); }
+    .btn-ghost {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .hero-scroll {
+      position: absolute; bottom: 2.5rem; left: 2.5rem;
+      font-family: var(--font-code); font-size: .75rem;
+      color: var(--muted); writing-mode: vertical-rl;
+      opacity: 0; animation: fadeUp .7s .9s forwards;
+    }
+
+    /* ── SECTIONS COMMON ── */
+    section { position: relative; z-index: 1; padding: 6rem 2.5rem; }
+    .section-label {
+      font-family: var(--font-code); font-size: .75rem;
+      color: var(--accent2); letter-spacing: .12em; text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: var(--font-head);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800; line-height: 1.1;
+      letter-spacing: -.03em;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── CONCEPTS GRID ── */
+    #conceitos { background: var(--surface); border-top: 1px solid var(--border); }
+    .concepts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .concept-card {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2rem;
+      background: var(--bg);
+      transition: border-color .2s, transform .2s;
+      cursor: default;
+    }
+    .concept-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+    .concept-icon {
+      font-size: 2rem; margin-bottom: 1rem;
+      display: block;
+    }
+    .concept-card h3 {
+      font-family: var(--font-head);
+      font-size: 1.2rem; font-weight: 700;
+      margin-bottom: .6rem;
+    }
+    .concept-card p { color: var(--muted); font-size: .95rem; }
+
+    /* ── CODE EXAMPLES ── */
+    #exemplos { border-top: 1px solid var(--border); }
+    .examples-container { display: flex; flex-direction: column; gap: 4rem; margin-top: 3rem; }
+    .example-block {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+    @media (max-width: 768px) { .example-block { grid-template-columns: 1fr; } }
+    .example-text h3 {
+      font-family: var(--font-head);
+      font-size: 1.5rem; font-weight: 700;
+      margin-bottom: .75rem;
+    }
+    .example-text p { color: var(--muted); }
+    .example-text ul {
+      margin-top: 1rem; padding-left: 1.2rem;
+      color: var(--muted); display: flex; flex-direction: column; gap: .4rem;
+    }
+    .example-text ul li::marker { color: var(--accent); }
+
+    .code-block {
+      background: #0a0a0d;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .7rem 1.2rem;
+      background: #111116;
+      border-bottom: 1px solid var(--border);
+    }
+    .code-dots { display: flex; gap: .45rem; }
+    .code-dots span {
+      width: 11px; height: 11px; border-radius: 50%;
+      background: var(--border);
+    }
+    .code-dots span:nth-child(1) { background: #ff5f57; }
+    .code-dots span:nth-child(2) { background: #febc2e; }
+    .code-dots span:nth-child(3) { background: #28c840; }
+    .code-lang {
+      font-family: var(--font-code);
+      font-size: .72rem; color: var(--muted);
+      letter-spacing: .08em;
+    }
+    .code-copy {
+      font-family: var(--font-code); font-size: .72rem;
+      background: none; border: 1px solid var(--border);
+      color: var(--muted); padding: .2rem .6rem;
+      border-radius: 3px; cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+    .code-copy:hover { color: var(--accent); border-color: var(--accent); }
+    pre {
+      padding: 1.5rem;
+      overflow-x: auto;
+      font-family: var(--font-code);
+      font-size: .85rem; line-height: 1.7;
+    }
+
+    /* syntax colors */
+    .kw  { color: #c792ea; }
+    .fn  { color: #82aaff; }
+    .str { color: #c3e88d; }
+    .num { color: #f78c6c; }
+    .cmt { color: #546e7a; font-style: italic; }
+    .op  { color: var(--accent); }
+    .var { color: var(--accent2); }
+
+    /* ── ROADMAP ── */
+    #roadmap { background: var(--surface); border-top: 1px solid var(--border); }
+    .roadmap-steps {
+      display: flex; flex-direction: column;
+      gap: 0; margin-top: 3rem;
+      position: relative;
+    }
+    .roadmap-steps::before {
+      content: '';
+      position: absolute; left: 1.5rem; top: 0; bottom: 0;
+      width: 1px; background: var(--border);
+    }
+    .step {
+      display: flex; gap: 2rem;
+      padding: 2rem 0 2rem 4.5rem;
+      position: relative;
+    }
+    .step-num {
+      position: absolute; left: 0;
+      width: 3rem; height: 3rem;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-code); font-size: .8rem;
+      color: var(--accent);
+      transition: background .2s, border-color .2s;
+    }
+    .step:hover .step-num { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .step-content h4 {
+      font-family: var(--font-head);
+      font-size: 1.1rem; font-weight: 700;
+      margin-bottom: .4rem;
+    }
+    .step-content p { color: var(--muted); font-size: .95rem; }
+    .step-badge {
+      display: inline-block;
+      font-family: var(--font-code); font-size: .68rem;
+      padding: .15rem .55rem; border-radius: 2px;
+      margin-bottom: .6rem;
+      letter-spacing: .07em;
+    }
+    .badge-init  { background: rgba(232,255,71,.12); color: var(--accent); }
+    .badge-inter { background: rgba(71,255,232,.12); color: var(--accent2); }
+    .badge-avd   { background: rgba(199,146,234,.12); color: #c792ea; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 3rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    footer p { color: var(--muted); font-size: .875rem; }
+    .footer-logo {
+      font-family: var(--font-head);
+      font-weight: 800; font-size: 1rem;
+      color: var(--accent);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .6s, transform .6s; }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      nav { padding: 1rem 1.2rem; }
+      .nav-links { display: none; }
+      .hero, section { padding-left: 1.2rem; padding-right: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">&lt;code/&gt;</span>
+  <ul class="nav-links">
+    <li><a href="#conceitos">Conceitos</a></li>
+    <li><a href="#exemplos">Exemplos</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <span class="hero-tag">-- bem-vindo ao Roblox Studio</span>
+  <h1>Aprenda <span>Luau</span> do zero.</h1>
+  <p>Luau é a linguagem de script do Roblox Studio. Com ela você cria jogos, controla personagens, adiciona efeitos e muito mais — tudo dentro do Roblox.</p>
+  <div class="hero-cta">
+    <a href="#conceitos" class="btn btn-primary">Começar agora</a>
+    <a href="#roadmap" class="btn btn-ghost">Ver roadmap</a>
+  </div>
+  <span class="hero-scroll">scroll ↓</span>
+</section>
+
+<!-- CONCEITOS -->
+<section id="conceitos">
+  <p class="section-label reveal">-- fundamentos do luau</p>
+  <h2 class="section-title reveal">Os pilares do<br>Luau no Roblox</h2>
+  <div class="concepts-grid">
+
+    <div class="concept-card reveal">
+      <span class="concept-icon">📦</span>
+      <h3>Variáveis</h3>
+      <p>Guardam informações como vida do jogador, velocidade ou pontuação. Em Luau usamos <code style="font-family:var(--font-code);color:var(--accent2)">local</code> para declarar.</p>
+    </div>
+
+    <div class="concept-card reveal">
+      <span class="concept-icon">🔀</span>
+      <h3>Condicionais</h3>
+      <p>Tomada de decisões: <em>se o jogador tiver 0 de vida, fim de jogo</em>. A base de toda lógica de gameplay.</p>
+    </div>
+
+    <div class="concept-card reveal">
+      <span class="concept-icon">🔁</span>
+      <h3>Laços (Loops)</h3>
+      <p>Repita ações — como checar colisões a cada frame ou gerar inimigos em intervalos com <code style="font-family:var(--font-code);color:var(--accent2)">while</code> e <code style="font-family:var(--font-code);color:var(--accent2)">for</code>.</p>
+    </div>
+
+    <div class="concept-card reveal">
+      <span class="concept-icon">🧩</span>
+      <h3>Funções</h3>
+      <p>Blocos reutilizáveis de lógica. Crie uma função <code style="font-family:var(--font-code);color:var(--accent2)">DarDano()</code> e chame-a sempre que precisar.</p>
+    </div>
+
+    <div class="concept-card reveal">
+      <span class="concept-icon">🎮</span>
+      <h3>Eventos (Events)</h3>
+      <p>Luau é orientado a eventos: <code style="font-family:var(--font-code);color:var(--accent2)">Touched</code>, <code style="font-family:var(--font-code);color:var(--accent2)">ClickDetector</code>, <code style="font-family:var(--font-code);color:var(--accent2)">PlayerAdded</code> — reaja ao que acontece no jogo.</p>
+    </div>
+
+    <div class="concept-card reveal">
+      <span class="concept-icon">🏗️</span>
+      <h3>Services do Roblox</h3>
+      <p>APIs nativas como <code style="font-family:var(--font-code);color:var(--accent2)">Players</code>, <code style="font-family:var(--font-code);color:var(--accent2)">Workspace</code> e <code style="font-family:var(--font-code);color:var(--accent2)">ReplicatedStorage</code> — acessadas via <code style="font-family:var(--font-code);color:var(--accent2)">game:GetService()</code>.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- EXEMPLOS -->
+<section id="exemplos">
+  <p class="section-label reveal">-- na prática</p>
+  <h2 class="section-title reveal">Luau real,<br>explicado</h2>
+
+  <div class="examples-container">
+
+    <!-- Exemplo 1 -->
+    <div class="example-block">
+      <div class="example-text reveal">
+        <h3>Variáveis e tipos</h3>
+        <p>Em Luau, toda variável local começa com <code style="font-family:var(--font-code);color:var(--accent2)">local</code>. Você pode guardar números, textos, booleanos e até objetos do jogo.</p>
+        <ul>
+          <li>Sempre use <code style="font-family:var(--font-code);color:var(--accent2)">local</code> — variáveis globais são lentas e perigosas</li>
+          <li>Strings usam aspas duplas <code style="font-family:var(--font-code);color:var(--accent2)">"texto"</code> ou simples <code style="font-family:var(--font-code);color:var(--accent2)">'texto'</code></li>
+          <li>Concatenação de texto usa <code style="font-family:var(--font-code);color:var(--accent2)">..</code> em vez de <code style="font-family:var(--font-code);color:var(--accent2)">+</code></li>
+        </ul>
+      </div>
+      <div class="code-block reveal">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span class="code-lang">Luau</span>
+          <button class="code-copy" onclick="copyCode(this)">copiar</button>
+        </div>
+        <pre><span class="cmt">-- Declarando variáveis locais</span>
+<span class="kw">local</span> <span class="var">nomeJogador</span> <span class="op">=</span> <span class="str">"PlayerOne"</span>
+<span class="kw">local</span> <span class="var">vida</span>        <span class="op">=</span> <span class="num">100</span>
+<span class="kw">local</span> <span class="var">estaVivo</span>    <span class="op">=</span> <span class="kw">true</span>
+
+<span class="cmt">-- Concatenação com ..</span>
+<span class="kw">local</span> <span class="var">msg</span> <span class="op">=</span> <span class="str">"Jogador: "</span> <span class="op">..</span> <span class="var">nomeJogador</span>
+           <span class="op">..</span> <span class="str">" | Vida: "</span> <span class="op">..</span> <span class="var">vida</span>
+
+<span class="fn">print</span>(<span class="var">msg</span>)
+<span class="cmt">-- → Jogador: PlayerOne | Vida: 100</span></pre>
+      </div>
+    </div>
+
+    <!-- Exemplo 2 -->
+    <div class="example-block">
+      <div class="example-text reveal">
+        <h3>Condicionais + Eventos</h3>
+        <p>Detecte quando uma peça é tocada com o evento <code style="font-family:var(--font-code);color:var(--accent2)">Touched</code> e use <code style="font-family:var(--font-code);color:var(--accent2)">if/elseif/else</code> para decidir o que fazer.</p>
+        <ul>
+          <li>Luau usa <code style="font-family:var(--font-code);color:var(--accent2)">elseif</code> (tudo junto, sem espaço)</li>
+          <li>Blocos terminam com <code style="font-family:var(--font-code);color:var(--accent2)">end</code></li>
+          <li><code style="font-family:var(--font-code);color:var(--accent2)">:Connect()</code> registra a função no evento</li>
+        </ul>
+      </div>
+      <div class="code-block reveal">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span class="code-lang">Luau</span>
+          <button class="code-copy" onclick="copyCode(this)">copiar</button>
+        </div>
+        <pre><span class="kw">local</span> <span class="var">parte</span> <span class="op">=</span> <span class="fn">script</span>.Parent
+<span class="kw">local</span> <span class="var">vida</span>  <span class="op">=</span> <span class="num">100</span>
+
+<span class="var">parte</span>.Touched:<span class="fn">Connect</span>(<span class="kw">function</span>(<span class="var">hit</span>)
+  <span class="kw">local</span> <span class="var">personagem</span> <span class="op">=</span> <span class="var">hit</span>.Parent
+  <span class="kw">local</span> <span class="var">humanoide</span> <span class="op">=</span>
+    <span class="var">personagem</span>:<span class="fn">FindFirstChild</span>(<span class="str">"Humanoid"</span>)
+
+  <span class="kw">if</span> <span class="var">humanoide</span> <span class="kw">then</span>
+    <span class="var">vida</span> <span class="op">=</span> <span class="var">vida</span> <span class="op">-</span> <span class="num">10</span>
+    <span class="fn">print</span>(<span class="str">"Vida restante: "</span> <span class="op">..</span> <span class="var">vida</span>)
+  <span class="kw">end</span>
+<span class="kw">end</span>)</pre>
+      </div>
+    </div>
+
+    <!-- Exemplo 3 -->
+    <div class="example-block">
+      <div class="example-text reveal">
+        <h3>Funções e loops</h3>
+        <p>Crie funções nomeadas e use <code style="font-family:var(--font-code);color:var(--accent2)">for</code> numérico para repetir ações — por exemplo, gerar vários objetos no mapa.</p>
+        <ul>
+          <li><code style="font-family:var(--font-code);color:var(--accent2)">for i = 1, 5 do</code> repete 5 vezes</li>
+          <li><code style="font-family:var(--font-code);color:var(--accent2)">task.wait()</code> é o jeito moderno de pausar (não use <code style="font-family:var(--font-code);color:var(--accent2)">wait()</code>)</li>
+          <li>Use <code style="font-family:var(--font-code);color:var(--accent2)">Instance.new()</code> para criar objetos</li>
+        </ul>
+      </div>
+      <div class="code-block reveal">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span class="code-lang">Luau</span>
+          <button class="code-copy" onclick="copyCode(this)">copiar</button>
+        </div>
+        <pre><span class="kw">local</span> <span class="var">Workspace</span> <span class="op">=</span> <span class="fn">game</span>:<span class="fn">GetService</span>(<span class="str">"Workspace"</span>)
+
+<span class="kw">local function</span> <span class="fn">criarMoeda</span>(<span class="var">posX</span>)
+  <span class="kw">local</span> <span class="var">moeda</span> <span class="op">=</span> <span class="fn">Instance</span>.<span class="fn">new</span>(<span class="str">"Part"</span>)
+  <span class="var">moeda</span>.Size     <span class="op">=</span> <span class="fn">Vector3</span>.<span class="fn">new</span>(<span class="num">1</span>, <span class="num">1</span>, <span class="num">1</span>)
+  <span class="var">moeda</span>.Position <span class="op">=</span> <span class="fn">Vector3</span>.<span class="fn">new</span>(<span class="var">posX</span>, <span class="num">5</span>, <span class="num">0</span>)
+  <span class="var">moeda</span>.BrickColor <span class="op">=</span> <span class="fn">BrickColor</span>.<span class="fn">new</span>(<span class="str">"Bright yellow"</span>)
+  <span class="var">moeda</span>.Parent <span class="op">=</span> <span class="var">Workspace</span>
+<span class="kw">end</span>
+
+<span class="cmt">-- Cria 5 moedas lado a lado</span>
+<span class="kw">for</span> <span class="var">i</span> <span class="op">=</span> <span class="num">1</span>, <span class="num">5</span> <span class="kw">do</span>
+  <span class="fn">criarMoeda</span>(<span class="var">i</span> <span class="op">*</span> <span class="num">3</span>)
+  <span class="fn">task</span>.<span class="fn">wait</span>(<span class="num">0.2</span>)
+<span class="kw">end</span></pre>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <p class="section-label reveal">-- por onde ir</p>
+  <h2 class="section-title reveal">Seu roadmap<br>no Roblox Studio</h2>
+
+  <div class="roadmap-steps">
+
+    <div class="step reveal">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <span class="step-badge badge-init">Iniciante</span>
+        <h4>Interface do Roblox Studio</h4>
+        <p>Explore o Explorer, Properties e o Output. Entenda a hierarquia de objetos: Workspace, ServerScriptService, ReplicatedStorage.</p>
+      </div>
+    </div>
+
+    <div class="step reveal">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <span class="step-badge badge-init">Iniciante</span>
+        <h4>Variáveis, tipos e print()</h4>
+        <p>Escreva seus primeiros scripts com <code style="font-family:var(--font-code);color:var(--accent2)">local</code>, use <code style="font-family:var(--font-code);color:var(--accent2)">print()</code> para debugar e entenda os tipos básicos do Luau.</p>
+      </div>
+    </div>
+
+    <div class="step reveal">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <span class="step-badge badge-init">Iniciante</span>
+        <h4>Condicionais e loops</h4>
+        <p>Controle o fluxo do jogo com <code style="font-family:var(--font-code);color:var(--accent2)">if/elseif/else</code>, <code style="font-family:var(--font-code);color:var(--accent2)">for</code> e <code style="font-family:var(--font-code);color:var(--accent2)">while</code>. Crie sistemas simples de pontuação e vidas.</p>
+      </div>
+    </div>
+
+    <div class="step reveal">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <span class="step-badge badge-inter">Intermediário</span>
+        <h4>Eventos e funções</h4>
+        <p>Reaja ao que acontece no jogo com <code style="font-family:var(--font-code);color:var(--accent2)">Touched</code>, <code style="font-family:var(--font-code);color:var(--accent2)">PlayerAdded</code>, <code style="font-family:var(--font-code);color:var(--accent2)">ClickDetector</code>. Organize a lógica em funções reutilizáveis.</p>
+      </div>
+    </div>
+
+    <div class="step reveal">
+      <div class="step-num">05</div>
+      <div class="step-content">
+        <span class="step-badge badge-inter">Intermediário</span>
+        <h4>RemoteEvents e Client/Server</h4>
+        <p>Entenda a diferença entre <code style="font-family:var(--font-code);color:var(--accent2)">Script</code> (servidor) e <code style="font-family:var(--font-code);color:var(--accent2)">LocalScript</code> (cliente). Use <code style="font-family:var(--font-code);color:var(--accent2)">RemoteEvent</code> para comunicar os dois lados.</p>
+      </div>
+    </div>
+
+    <div class="step reveal">
+      <div class="step-num">06</div>
+      <div class="step-content">
+        <span class="step-badge badge-avd">Avançado</span>
+        <h4>DataStores e monetização</h4>
+        <p>Salve dados dos jogadores com <code style="font-family:var(--font-code);color:var(--accent2)">DataStoreService</code>, crie passes de jogo e implemente sistemas de loja com <code style="font-family:var(--font-code);color:var(--accent2)">MarketplaceService</code>.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">&lt;code/&gt;</span>
+  <p>Feito com HTML, CSS e JS puro &mdash; focado em Luau para Roblox Studio.</p>
+  <p style="color:var(--muted);font-size:.8rem">© 2025</p>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.12 }
+  );
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Copy code
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'copiado!';
+      setTimeout(() => btn.textContent = 'copiar', 2000);
+    });
+  }
+</script>
+</body>
+</html>
